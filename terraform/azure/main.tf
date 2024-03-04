@@ -6,9 +6,6 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name  = "fiap-tech-challenge-main-group"
-    storage_account_name = "sandubaterraform"
-    container_name       = "sanduba-terraform-storage-container"
     key = "terraform-auth.tfstate"
   }
 }
@@ -64,17 +61,18 @@ data "azurerm_storage_account" "storage_account_terraform" {
 }
 
 resource "azurerm_linux_function_app" "linux_function" {
-  name                       = "sanduba-auth-function"
-  resource_group_name        = azurerm_resource_group.resource_group.name
-  location                   = azurerm_resource_group.resource_group.location
-  storage_account_name       = data.azurerm_storage_account.storage_account_terraform.name
-  storage_account_access_key = data.azurerm_storage_account.storage_account_terraform.primary_access_key
-  service_plan_id            = azurerm_service_plan.auth_plan.id
-  https_only                 = true
+  name                        = "sanduba-auth-function"
+  resource_group_name         = azurerm_resource_group.resource_group.name
+  location                    = azurerm_resource_group.resource_group.location
+  storage_account_name        = data.azurerm_storage_account.storage_account_terraform.name
+  storage_account_access_key  = data.azurerm_storage_account.storage_account_terraform.primary_access_key
+  service_plan_id             = azurerm_service_plan.auth_plan.id
+  https_only                  = true
   functions_extension_version = "~4"
 
   app_settings = {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
+    FUNCTIONS_EXTENSION_VERSION         = "~4"
   }
 
   site_config {
@@ -82,9 +80,9 @@ resource "azurerm_linux_function_app" "linux_function" {
     application_insights_connection_string = azurerm_application_insights.auth_app_insights.connection_string
     application_stack {
       docker {
-        registry_url      = "https://index.docker.io"
-        image_name        = "cangelosilima/sanduba-auth.api"
-        image_tag         = "latest"
+        registry_url = "https://index.docker.io"
+        image_name   = "cangelosilima/sanduba-auth.api"
+        image_tag    = "latest"
       }
     }
   }
