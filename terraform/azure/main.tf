@@ -6,12 +6,19 @@ terraform {
     }
   }
   backend "azurerm" {
+    resource_group_name  = "fiap-tech-challenge-main-group"
+    storage_account_name = "sandubaterraform"
+    container_name       = "sanduba-terraform-storage-container"
     key = "terraform-auth.tfstate"
   }
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
 
 data "azurerm_resource_group" "main_group" {
@@ -24,7 +31,7 @@ resource "azurerm_resource_group" "resource_group" {
   managed_by = data.azurerm_resource_group.main_group.name
 
   tags = {
-    environment = "development"
+    environment = data.azurerm_resource_group.main_group.tags["environment"]
   }
 }
 
@@ -33,7 +40,7 @@ resource "azurerm_service_plan" "auth_plan" {
   resource_group_name = azurerm_resource_group.resource_group.name
   location            = azurerm_resource_group.resource_group.location
   os_type             = "Linux"
-  sku_name            = "Y1"
+  sku_name            = "B1"
 
   tags = {
     environment = azurerm_resource_group.resource_group.tags["environment"]
@@ -64,18 +71,25 @@ resource "azurerm_linux_function_app" "linux_function" {
   storage_account_access_key = data.azurerm_storage_account.storage_account_terraform.primary_access_key
   service_plan_id            = azurerm_service_plan.auth_plan.id
   https_only                 = true
+  functions_extension_version = "~4"
+
+  app_settings = {
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
+  }
 
   site_config {
     application_insights_key               = azurerm_application_insights.auth_app_insights.instrumentation_key
     application_insights_connection_string = azurerm_application_insights.auth_app_insights.connection_string
     application_stack {
       docker {
-        registry_url      = "https://docker.io"
-        image_name        = "${var.registry_username}/sanduba-auth.api"
+        registry_url      = "https://index.docker.io"
+        image_name        = "cangelosilima/sanduba-auth.api"
         image_tag         = "latest"
-        registry_username = var.registry_username
-        registry_password = var.registry_password
       }
     }
+  }
+
+  tags = {
+    environment = azurerm_resource_group.resource_group.tags["environment"]
   }
 }
