@@ -73,6 +73,7 @@ resource "azurerm_linux_function_app" "linux_function" {
   app_settings = {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
     FUNCTIONS_EXTENSION_VERSION         = "~4"
+    AUTH_SECRET_KEY                     = var.authentication_secret_key
   }
 
   site_config {

@@ -14,8 +14,10 @@ namespace Sanduba.Auth.Api.Gateway
                 new Claim("Sub", userId.ToString())
             };
 
+            var jwtSecretKey = Environment.GetEnvironmentVariable("AUTH_SECRET_KEY");
+
             var signingCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString())),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
                 SecurityAlgorithms.HmacSha256
             );
 
