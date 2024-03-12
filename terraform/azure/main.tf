@@ -60,6 +60,19 @@ data "azurerm_storage_account" "storage_account_terraform" {
   resource_group_name = data.azurerm_resource_group.main_group.name
 }
 
+data "azurerm_virtual_network" "virtual_network" {
+  name                = "fiap-tech-challenge-network"
+  resource_group_name = azurerm_resource_group.main_group.name
+}
+
+
+data "azurerm_subnet" "api_subnet" {
+  name                 = "fiap-tech-challenge-api-subnet"
+  virtual_network_name = data.azurerm_virtual_network.virtual_network.name
+  resource_group_name  = data.azurerm_virtual_network.virtual_network.resource_group_name
+}
+
+
 resource "azurerm_linux_function_app" "linux_function" {
   name                        = "sanduba-auth-function"
   resource_group_name         = azurerm_resource_group.resource_group.name
@@ -87,6 +100,8 @@ resource "azurerm_linux_function_app" "linux_function" {
       }
     }
   }
+
+  virtual_network_subnet_id = data.azurerm_subnet.api_subnet.id
 
   tags = {
     environment = azurerm_resource_group.resource_group.tags["environment"]
