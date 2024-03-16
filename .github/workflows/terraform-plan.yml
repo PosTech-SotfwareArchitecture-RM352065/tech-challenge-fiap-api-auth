@@ -17,7 +17,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./terraform/azure
+        working-directory: ./azure
 
     steps:
     # Checkout the repository to the GitHub Actions runner
