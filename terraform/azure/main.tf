@@ -65,13 +65,11 @@ data "azurerm_virtual_network" "virtual_network" {
   resource_group_name = data.azurerm_resource_group.main_group.name
 }
 
-
 data "azurerm_subnet" "api_subnet" {
   name                 = "fiap-tech-challenge-api-subnet"
   virtual_network_name = data.azurerm_virtual_network.virtual_network.name
   resource_group_name  = data.azurerm_virtual_network.virtual_network.resource_group_name
 }
-
 
 resource "azurerm_linux_function_app" "linux_function" {
   name                        = "sanduba-auth-function"
@@ -92,6 +90,7 @@ resource "azurerm_linux_function_app" "linux_function" {
   site_config {
     application_insights_key               = azurerm_application_insights.auth_app_insights.instrumentation_key
     application_insights_connection_string = azurerm_application_insights.auth_app_insights.connection_string
+    always_on                              = true
     application_stack {
       docker {
         registry_url = "https://index.docker.io"
