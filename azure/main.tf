@@ -74,6 +74,9 @@ resource "azurerm_linux_function_app" "linux_function" {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE = false
     FUNCTIONS_EXTENSION_VERSION         = "~4"
     AUTH_SECRET_KEY                     = var.authentication_secret_key
+    AUTH_ISSUER                         = "Sanduba.Auth"
+    AUTH_AUDIENCE                       = "Users"
+    ConnectionString                    = var.main_database_connectionstring
   }
 
   site_config {

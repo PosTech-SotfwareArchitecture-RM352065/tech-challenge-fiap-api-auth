@@ -53,4 +53,5 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.AZURE_SERVICE_PRINCIPAL_TENANT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SERVICE_PRINCIPAL_SUBSCRIPTION_ID }}
         TF_VAR_authentication_secret_key: ${{ secrets.APP_AUTH_SECRET_KEY }}
+        TF_VAR_main_database_connectionstring: ${{ secrets.APP_MAIN_DATABASE_CONNECTION_STRING }}
       run: terraform apply -auto-approve
