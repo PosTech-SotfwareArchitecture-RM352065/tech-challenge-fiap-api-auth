@@ -49,6 +49,15 @@ resource "random_password" "sqlserver_password" {
 resource "random_uuid" "sqlserver_user" {
 }
 
+resource "random_uuid" "auth_secret_key" {
+}
+
+resource "github_actions_organization_secret" "github_auth_secret_key" {
+  secret_name     = "APP_AUTH_SECRET_KEY"
+  visibility      = "all"
+  plaintext_value = random_password.auth_secret_key.result
+}
+
 resource "azurerm_mssql_server" "sqlserver" {
   name                         = "sanduba-costumer-sqlserver"
   resource_group_name          = azurerm_resource_group.resource_group.name
@@ -98,6 +107,12 @@ resource "github_actions_organization_variable" "var_database_connectionstring" 
   value         = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 }
 
+resource "github_actions_organization_secret" "database_connectionstring" {
+  secret_name     = "APP_COSTUMER_DATABASE_CONNECTION_STRING"
+  visibility      = "all"
+  plaintext_value = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+}
+
 resource "azurerm_service_plan" "costumer_plan" {
   name                = "costumer-app-service-plan"
   resource_group_name = azurerm_resource_group.resource_group.name
@@ -140,6 +155,9 @@ resource "azurerm_linux_function_app" "linux_function" {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE   = false
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     "SqlServerSettings__ConnectionString" = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    AUTH_SECRET_KEY                       = random_uuid.auth_secret_key.result
+    AUTH_ISSUER                           = "Sanduba.Auth"
+    AUTH_AUDIENCE                         = "Users"
   }
 
   site_config {
