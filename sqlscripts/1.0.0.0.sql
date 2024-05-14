@@ -1,8 +1,8 @@
-﻿IF(OBJECT_ID('Costumer') IS NOT NULL) DROP TABLE Costumer
+﻿IF(OBJECT_ID('Costumers') IS NOT NULL) DROP TABLE Costumers
 IF(OBJECT_ID('dbo.Sp_AddCostumer') IS NOT NULL) DROP PROCEDURE dbo.Sp_AddCostumer
 IF(OBJECT_ID('dbo.Sp_ValidateLogin') IS NOT NULL) DROP PROCEDURE dbo.Sp_ValidateLogin
 
-CREATE TABLE Costumer (
+CREATE TABLE Costumers (
     Id          UNIQUEIDENTIFIER    NOT NULL
 ,   CPF         VARCHAR(11)         NOT NULL
 ,   [Name]      VARCHAR(50)         NOT NULL
