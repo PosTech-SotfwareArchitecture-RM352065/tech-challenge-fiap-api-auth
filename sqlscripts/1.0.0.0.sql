@@ -22,8 +22,8 @@ CREATE PROCEDURE dbo.Sp_AddCostumer
 
 AS
 BEGIN
-    INSERT INTO dbo.Costumer (Id, CPF, Name, Email, Password)
-    VALUES(@Id, @CPF, @Name, @Email, HASHBYTES('SHA2_512', @Password+CAST(@Id AS NVARCHAR(36))))
+    INSERT INTO dbo.Costumers (Id, CPF, Name, Email, Password)
+    VALUES(@Id, @CPF, @Name, @Email, HASHBYTES('SHA2_512', @Password + CAST(@Id AS NVARCHAR(36))))
 END
 GO
 
@@ -39,8 +39,8 @@ BEGIN
 
     SET @Id
         = (SELECT TOP 1 Id
-             FROM dbo.Costumer 
+             FROM dbo.Costumers 
             WHERE Cpf = @Username
-              AND [Password] = HASHBYTES('SHA2_512', @Password+CAST(Id AS NVARCHAR(36))))
+              AND [Password] = HASHBYTES('SHA2_512', @Password + CAST(Id AS NVARCHAR(36))))
 END
 GO
