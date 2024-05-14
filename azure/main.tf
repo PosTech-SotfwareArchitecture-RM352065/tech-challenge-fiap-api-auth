@@ -107,12 +107,6 @@ resource "github_actions_organization_variable" "var_database_connectionstring" 
   value         = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 }
 
-resource "github_actions_organization_secret" "database_connectionstring" {
-  secret_name     = "APP_COSTUMER_DATABASE_CONNECTION_STRING"
-  visibility      = "all"
-  plaintext_value = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-}
-
 resource "azurerm_service_plan" "costumer_plan" {
   name                = "costumer-app-service-plan"
   resource_group_name = azurerm_resource_group.resource_group.name
