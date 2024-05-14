@@ -55,7 +55,7 @@ resource "random_uuid" "auth_secret_key" {
 resource "github_actions_organization_secret" "github_auth_secret_key" {
   secret_name     = "APP_AUTH_SECRET_KEY"
   visibility      = "all"
-  plaintext_value = random_password.auth_secret_key.result
+  plaintext_value = random_uuid.auth_secret_key.result
 }
 
 resource "azurerm_mssql_server" "sqlserver" {
