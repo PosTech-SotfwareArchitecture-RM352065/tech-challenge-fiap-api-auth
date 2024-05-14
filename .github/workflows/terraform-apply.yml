@@ -7,9 +7,12 @@ on:
 
 env:
   TF_LOG: INFO
+  GITHUB_OWNER: ${{ github.repository_owner }}
+  GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
 
 jobs:
   azure_terraform:
+    permissions: write-all
     name: 'Azure - Terraform apply'
     runs-on: ubuntu-latest
 
@@ -52,6 +55,11 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET }}
         ARM_TENANT_ID: ${{ secrets.AZURE_SERVICE_PRINCIPAL_TENANT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SERVICE_PRINCIPAL_SUBSCRIPTION_ID }}
-        TF_VAR_authentication_secret_key: ${{ secrets.APP_AUTH_SECRET_KEY }}
-        TF_VAR_main_database_connectionstring: ${{ secrets.APP_MAIN_DATABASE_CONNECTION_STRING }}
       run: terraform apply -auto-approve
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    name: Main Database
+    uses: ./.github/workflows/deploy-main-database.yml
+    secrets: inherit
+    needs: [azure_terraform]
