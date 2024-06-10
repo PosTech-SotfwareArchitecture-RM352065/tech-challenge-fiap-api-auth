@@ -1,42 +1,10 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "3.90.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.6.1"
-    }
-    github = {
-      source  = "integrations/github"
-      version = "~> 6.0"
-    }
-  }
-  backend "azurerm" {
-    key = "terraform-costumer.tfstate"
-  }
-}
-
-provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
-}
-
-data "azurerm_resource_group" "main_group" {
-  name = "fiap-tech-challenge-main-group"
-}
 
 resource "azurerm_resource_group" "resource_group" {
-  name       = "fiap-tech-challenge-costumer-group"
-  location   = data.azurerm_resource_group.main_group.location
-  managed_by = data.azurerm_resource_group.main_group.name
+  name     = "fiap-tech-challenge-costumer-group"
+  location = var.main_resource_group_location
 
   tags = {
-    environment = data.azurerm_resource_group.main_group.tags["environment"]
+    environment = var.environment
   }
 }
 
@@ -50,12 +18,6 @@ resource "random_uuid" "sqlserver_user" {
 }
 
 resource "random_uuid" "auth_secret_key" {
-}
-
-resource "github_actions_organization_secret" "github_auth_secret_key" {
-  secret_name     = "APP_AUTH_SECRET_KEY"
-  visibility      = "all"
-  plaintext_value = random_uuid.auth_secret_key.result
 }
 
 resource "azurerm_mssql_server" "sqlserver" {
@@ -95,18 +57,6 @@ resource "azurerm_mssql_database" "sanduba_costumer_database" {
   }
 }
 
-resource "github_actions_organization_secret" "database_connectionstring" {
-  secret_name     = "APP_COSTUMER_DATABASE_CONNECTION_STRING"
-  visibility      = "all"
-  plaintext_value = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-}
-
-resource "github_actions_organization_variable" "var_database_connectionstring" {
-  variable_name = "VAR_APP_COSTUMER_DATABASE_CONNECTION_STRING"
-  visibility    = "all"
-  value         = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-}
-
 resource "azurerm_service_plan" "costumer_plan" {
   name                = "costumer-app-service-plan"
   resource_group_name = azurerm_resource_group.resource_group.name
@@ -121,12 +71,12 @@ resource "azurerm_service_plan" "costumer_plan" {
 
 data "azurerm_storage_account" "storage_account_terraform" {
   name                = "sandubaterraform"
-  resource_group_name = data.azurerm_resource_group.main_group.name
+  resource_group_name = var.main_resource_group
 }
 
 data "azurerm_virtual_network" "virtual_network" {
   name                = "fiap-tech-challenge-network"
-  resource_group_name = data.azurerm_resource_group.main_group.name
+  resource_group_name = var.main_resource_group
 }
 
 data "azurerm_subnet" "api_subnet" {
@@ -174,12 +124,12 @@ resource "azurerm_linux_function_app" "linux_function" {
 
 data "azurerm_storage_account" "log_storage_account" {
   name                = "sandubalog"
-  resource_group_name = "fiap-tech-challenge-observability-group"
+  resource_group_name = var.main_resource_group
 }
 
 data "azurerm_log_analytics_workspace" "log_workspace" {
   name                = "fiap-tech-challenge-observability-workspace"
-  resource_group_name = "fiap-tech-challenge-observability-group"
+  resource_group_name = data.azurerm_storage_account.log_storage_account.resource_group_name
 }
 
 resource "azurerm_monitor_diagnostic_setting" "function_monitor" {
@@ -195,4 +145,14 @@ resource "azurerm_monitor_diagnostic_setting" "function_monitor" {
   metric {
     category = "AllMetrics"
   }
+}
+
+output "sanduba_costumer_database_connection_string" {
+  sensitive = true
+  value     = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+}
+
+output "sanduba_costumer_auth_key" {
+  sensitive = true
+  value     = random_uuid.auth_secret_key.result
 }
