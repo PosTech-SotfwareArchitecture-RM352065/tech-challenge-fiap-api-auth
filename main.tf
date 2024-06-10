@@ -38,8 +38,9 @@ module "azure" {
 }
 
 module "github" {
-  source                     = "./github"
-  auth_secret_key            = module.azure.sanduba_costumer_auth_key
-  database_connection_string = module.azure.sanduba_costumer_database_connection_string
-  environment                = data.azurerm_resource_group.main_group.tags["environment"]
+  source                                      = "./github"
+  sanduba_costumer_auth_secret_key            = module.azure.sanduba_costumer_auth_key
+  sanduba_costumer_database_connection_string = module.azure.sanduba_costumer_database_connection_string
+  sanduba_costumer_url                        = module.azure.sanduba_costumer_url
+  environment                                 = data.azurerm_resource_group.main_group.tags["environment"]
 }

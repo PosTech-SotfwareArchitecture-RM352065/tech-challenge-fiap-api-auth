@@ -156,3 +156,8 @@ output "sanduba_costumer_auth_key" {
   sensitive = true
   value     = random_uuid.auth_secret_key.result
 }
+
+output "sanduba_costumer_url" {
+  sensitive = false
+  value     = "https://${azurerm_linux_function_app.linux_function.default_hostname}/api"
+}
