@@ -1,7 +1,7 @@
 variable "environment" {
   type      = string
   sensitive = false
-  default   = "development"
+  default   = ""
 }
 
 variable "sanduba_costumer_auth_secret_key" {

@@ -4,6 +4,7 @@ on: [pull_request, workflow_dispatch]
 
 env:
   TF_LOG: INFO
+  TF_VAR_location: ${{ vars.AZURE_LOCATION }}
   GITHUB_OWNER: ${{ github.repository_owner }} 
   GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
 
@@ -25,6 +26,17 @@ jobs:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Set environment variable
+      id: set-env
+      run: |
+        if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+          echo "TF_VAR_environment=production" >> $GITHUB_ENV
+        elif [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
+          echo "TF_VAR_environment=staging" >> $GITHUB_ENV
+        else
+          echo "TF_VAR_environment=default" >> $GITHUB_ENV
+        fi
 
     # Install the preferred version of Terraform CLI 
     - name: Setup Terraform
