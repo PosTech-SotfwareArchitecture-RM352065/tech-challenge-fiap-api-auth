@@ -1,6 +1,6 @@
 
 resource "azurerm_resource_group" "resource_group" {
-  name     = "fiap-tech-challenge-costumer-group"
+  name     = "fiap-tech-challenge-customer-group"
   location = var.main_resource_group_location
 
   tags = {
@@ -21,7 +21,7 @@ resource "random_uuid" "auth_secret_key" {
 }
 
 resource "azurerm_mssql_server" "sqlserver" {
-  name                         = "sanduba-costumer-sqlserver"
+  name                         = "sanduba-customer-sqlserver"
   resource_group_name          = azurerm_resource_group.resource_group.name
   location                     = azurerm_resource_group.resource_group.location
   version                      = "12.0"
@@ -47,8 +47,8 @@ resource "azurerm_mssql_firewall_rule" "sqlserver_allow_home_ip_rule" {
   end_ip_address   = var.home_ip_address
 }
 
-resource "azurerm_mssql_database" "sanduba_costumer_database" {
-  name                 = "sanduba-costumer-database"
+resource "azurerm_mssql_database" "sanduba_customer_database" {
+  name                 = "sanduba-customer-database"
   server_id            = azurerm_mssql_server.sqlserver.id
   collation            = "SQL_Latin1_General_CP1_CI_AS"
   sku_name             = "Basic"
@@ -64,8 +64,8 @@ resource "azurerm_mssql_database" "sanduba_costumer_database" {
   }
 }
 
-resource "azurerm_service_plan" "costumer_plan" {
-  name                = "costumer-app-service-plan"
+resource "azurerm_service_plan" "customer_plan" {
+  name                = "customer-app-service-plan"
   resource_group_name = azurerm_resource_group.resource_group.name
   location            = azurerm_resource_group.resource_group.location
   os_type             = "Linux"
@@ -87,25 +87,25 @@ data "azurerm_virtual_network" "virtual_network" {
 }
 
 data "azurerm_subnet" "api_subnet" {
-  name                 = "fiap-tech-challenge-costumer-subnet"
+  name                 = "fiap-tech-challenge-customer-subnet"
   virtual_network_name = data.azurerm_virtual_network.virtual_network.name
   resource_group_name  = data.azurerm_virtual_network.virtual_network.resource_group_name
 }
 
 resource "azurerm_linux_function_app" "linux_function" {
-  name                        = "sanduba-costumer-function"
+  name                        = "sanduba-customer-function"
   resource_group_name         = azurerm_resource_group.resource_group.name
   location                    = azurerm_resource_group.resource_group.location
   storage_account_name        = data.azurerm_storage_account.storage_account_terraform.name
   storage_account_access_key  = data.azurerm_storage_account.storage_account_terraform.primary_access_key
-  service_plan_id             = azurerm_service_plan.costumer_plan.id
+  service_plan_id             = azurerm_service_plan.customer_plan.id
   https_only                  = true
   functions_extension_version = "~4"
 
   app_settings = {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE   = false
     FUNCTIONS_EXTENSION_VERSION           = "~4"
-    "SqlServerSettings__ConnectionString" = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    "SqlServerSettings__ConnectionString" = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
     AUTH_SECRET_KEY                       = random_uuid.auth_secret_key.result
     AUTH_ISSUER                           = "Sanduba.Auth"
     AUTH_AUDIENCE                         = "Users"
@@ -116,7 +116,7 @@ resource "azurerm_linux_function_app" "linux_function" {
     application_stack {
       docker {
         registry_url = "https://index.docker.io"
-        image_name   = "cangelosilima/sanduba-costumer-api"
+        image_name   = "cangelosilima/sanduba-customer-api"
         image_tag    = "latest"
       }
     }
@@ -140,7 +140,7 @@ data "azurerm_log_analytics_workspace" "log_workspace" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "function_monitor" {
-  name                       = "fiap-tech-challenge-costumer-monitor"
+  name                       = "fiap-tech-challenge-customer-monitor"
   target_resource_id         = azurerm_linux_function_app.linux_function.id
   storage_account_id         = data.azurerm_storage_account.log_storage_account.id
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_workspace.id
@@ -154,17 +154,17 @@ resource "azurerm_monitor_diagnostic_setting" "function_monitor" {
   }
 }
 
-output "sanduba_costumer_database_connection_string" {
+output "sanduba_customer_database_connection_string" {
   sensitive = true
-  value     = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_costumer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  value     = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 }
 
-output "sanduba_costumer_auth_key" {
+output "sanduba_customer_auth_key" {
   sensitive = true
   value     = random_uuid.auth_secret_key.result
 }
 
-output "sanduba_costumer_url" {
+output "sanduba_customer_url" {
   sensitive = false
   value     = "https://${azurerm_linux_function_app.linux_function.default_hostname}/api"
 }

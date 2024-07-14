@@ -14,7 +14,7 @@ terraform {
     }
   }
   backend "azurerm" {
-    key = "terraform-costumer.tfstate"
+    key = "terraform-customer.tfstate"
   }
 }
 
@@ -40,8 +40,8 @@ module "azure" {
 
 module "github" {
   source                                      = "./github"
-  sanduba_costumer_auth_secret_key            = module.azure.sanduba_costumer_auth_key
-  sanduba_costumer_database_connection_string = module.azure.sanduba_costumer_database_connection_string
-  sanduba_costumer_url                        = module.azure.sanduba_costumer_url
+  sanduba_customer_auth_secret_key            = module.azure.sanduba_customer_auth_key
+  sanduba_customer_database_connection_string = module.azure.sanduba_customer_database_connection_string
+  sanduba_customer_url                        = module.azure.sanduba_customer_url
   environment                                 = data.azurerm_resource_group.main_group.tags["environment"]
 }
