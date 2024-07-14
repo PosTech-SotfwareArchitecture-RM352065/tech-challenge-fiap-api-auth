@@ -1,34 +1,34 @@
-﻿IF(OBJECT_ID('CostumerRequests') IS NOT NULL) DROP TABLE CostumerRequests
-IF(OBJECT_ID('Costumers') IS NOT NULL) DROP TABLE Costumers
-IF(OBJECT_ID('dbo.Sp_AddCostumer') IS NOT NULL) DROP PROCEDURE dbo.Sp_AddCostumer
+﻿IF(OBJECT_ID('CustomerRequests') IS NOT NULL) DROP TABLE CustomerRequests
+IF(OBJECT_ID('Customers') IS NOT NULL) DROP TABLE Customers
+IF(OBJECT_ID('dbo.Sp_AddCustomer') IS NOT NULL) DROP PROCEDURE dbo.Sp_AddCustomer
 IF(OBJECT_ID('dbo.Sp_ValidateLogin') IS NOT NULL) DROP PROCEDURE dbo.Sp_ValidateLogin
 
-CREATE TABLE Costumers (
+CREATE TABLE Customers (
     Id          UNIQUEIDENTIFIER    NOT NULL
 ,   CPF         VARCHAR(11)         NOT NULL
 ,   [Name]      VARCHAR(50)         NOT NULL
 ,   Email       VARCHAR(50)         NOT NULL
 ,   [Password]  BINARY(64)          NOT NULL
 ,   [Active]    BIT                 NOT NULL DEFAULT(1)
-,   CONSTRAINT Pk_Costumer PRIMARY KEY NONCLUSTERED (Id)
-,   CONSTRAINT Uk1_Costumer UNIQUE CLUSTERED (CPF)
+,   CONSTRAINT Pk_Customer PRIMARY KEY NONCLUSTERED (Id)
+,   CONSTRAINT Uk1_Customer UNIQUE CLUSTERED (CPF)
 )
 GO
 
-CREATE TABLE CostumerRequests (    
+CREATE TABLE CustomerRequests (    
     Id          UNIQUEIDENTIFIER    NOT NULL
-,   CostumerId  UNIQUEIDENTIFIER    NOT NULL
+,   CustomerId  UNIQUEIDENTIFIER    NOT NULL
 ,   RequestedAt DATETIME            NOT NULL
 ,   [Type]      VARCHAR(10)         NOT NULL
 ,   [Status]    VARCHAR(10)         NOT NULL DEFAULT ('REQUESTED')
 ,   [Comments]  VARCHAR(200)        NULL
-,   CONSTRAINT Pk_Costumer PRIMARY KEY NONCLUSTERED (Id)
-,   CONSTRAINT Fk1_Costumer FOREIGN KEY (CostumerId) REFERENCES Costumers (Id)
+,   CONSTRAINT Pk_Customer PRIMARY KEY NONCLUSTERED (Id)
+,   CONSTRAINT Fk1_Customer FOREIGN KEY (CustomerId) REFERENCES Customers (Id)
 )
 GO
 
 
-CREATE PROCEDURE dbo.Sp_AddCostumer
+CREATE PROCEDURE dbo.Sp_AddCustomer
     @Id              UNIQUEIDENTIFIER
 ,   @CPF             VARCHAR(11)
 ,   @Name            VARCHAR(50)
@@ -37,7 +37,7 @@ CREATE PROCEDURE dbo.Sp_AddCostumer
 
 AS
 BEGIN
-    INSERT INTO dbo.Costumers (Id, CPF, Name, Email, Password, Active)
+    INSERT INTO dbo.Customers (Id, CPF, Name, Email, Password, Active)
     VALUES(@Id, @CPF, @Name, @Email, HASHBYTES('SHA2_512', @Password + CAST(@Id AS NVARCHAR(36))), 1)
 END
 GO
@@ -54,7 +54,7 @@ BEGIN
 
     SET @Id
         = (SELECT TOP 1 Id
-             FROM dbo.Costumers 
+             FROM dbo.Customers 
             WHERE Cpf = @Username
               AND Active = 1
               AND [Password] = HASHBYTES('SHA2_512', @Password + CAST(Id AS NVARCHAR(36))))
