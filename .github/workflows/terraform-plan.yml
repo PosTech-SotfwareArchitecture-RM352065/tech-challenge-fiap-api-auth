@@ -5,6 +5,7 @@ on: [pull_request, workflow_dispatch]
 env:
   TF_LOG: INFO
   TF_VAR_location: ${{ vars.AZURE_LOCATION }}
+  TF_VAR_home_ip_address: ${{ secrets.HOME_IP }}
   GITHUB_OWNER: ${{ github.repository_owner }} 
   GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
 
@@ -20,7 +21,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./azure
 
     steps:
     # Checkout the repository to the GitHub Actions runner

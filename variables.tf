@@ -9,3 +9,9 @@ variable "environment" {
   sensitive = false
   default   = ""
 }
+
+variable "home_ip_address" {
+  type      = string
+  sensitive = true
+  default   = ""
+}

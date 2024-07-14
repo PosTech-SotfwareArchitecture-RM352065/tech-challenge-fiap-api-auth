@@ -35,6 +35,7 @@ module "azure" {
   main_resource_group          = data.azurerm_resource_group.main_group.name
   main_resource_group_location = data.azurerm_resource_group.main_group.location
   environment                  = data.azurerm_resource_group.main_group.tags["environment"]
+  home_ip_address              = var.home_ip_address
 }
 
 module "github" {
