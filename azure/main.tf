@@ -40,8 +40,8 @@ resource "azurerm_mssql_firewall_rule" "sqlserver_allow_azure_services_rule" {
   end_ip_address   = "0.0.0.0"
 }
 
-resource "azurerm_mssql_firewall_rule" "sqlserver_allow_azure_services_rule" {
-  name             = "Allow access to Azure services"
+resource "azurerm_mssql_firewall_rule" "sqlserver_allow_home_ip_rule" {
+  name             = "Allow access to Home IP"
   server_id        = azurerm_mssql_server.sqlserver.id
   start_ip_address = var.home_ip_address
   end_ip_address   = var.home_ip_address
