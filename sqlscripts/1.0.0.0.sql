@@ -16,14 +16,14 @@ CREATE TABLE Customers (
 GO
 
 CREATE TABLE CustomerRequests (    
-    Id          UNIQUEIDENTIFIER    NOT NULL
-,   CustomerId  UNIQUEIDENTIFIER    NOT NULL
-,   RequestedAt DATETIME            NOT NULL
-,   [Type]      VARCHAR(10)         NOT NULL
-,   [Status]    VARCHAR(10)         NOT NULL DEFAULT ('REQUESTED')
-,   [Comments]  VARCHAR(200)        NULL
-,   CONSTRAINT Pk_Customer PRIMARY KEY NONCLUSTERED (Id)
-,   CONSTRAINT Fk1_Customer FOREIGN KEY (CustomerId) REFERENCES Customers (Id)
+    Id              UNIQUEIDENTIFIER    NOT NULL
+,   CustomerId      UNIQUEIDENTIFIER    NOT NULL
+,   RequestedAt     DATETIME            NOT NULL
+,   [Type]          VARCHAR(15)         NOT NULL
+,   [Status]        VARCHAR(15)         NOT NULL DEFAULT ('REQUESTED')
+,   [Comments]      VARCHAR(200)        NULL
+,   CONSTRAINT Pk_CustomerRequests PRIMARY KEY NONCLUSTERED (Id)
+,   CONSTRAINT Fk1_CustomerRequests FOREIGN KEY (CustomerId) REFERENCES Customers (Id)
 )
 GO
 
