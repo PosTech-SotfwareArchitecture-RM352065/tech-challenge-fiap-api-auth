@@ -76,6 +76,25 @@ resource "azurerm_service_plan" "customer_plan" {
   }
 }
 
+resource "azurerm_servicebus_namespace" "servicebus_namespace" {
+  name                = "fiap-tech-challenge-customer-topic-namespace"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  sku                 = "Standard"
+
+  tags = {
+    environment = azurerm_resource_group.resource_group.tags["environment"]
+  }
+}
+
+resource "azurerm_servicebus_topic" "servicebus_topic" {
+  name         = "fiap-tech-challenge-customer-topic"
+  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id
+
+  enable_partitioning = false
+}
+
+
 data "azurerm_storage_account" "storage_account_terraform" {
   name                = "sandubaterraform"
   resource_group_name = var.main_resource_group
