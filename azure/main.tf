@@ -89,7 +89,7 @@ resource "azurerm_servicebus_namespace" "servicebus_namespace" {
 
 resource "azurerm_servicebus_topic" "servicebus_topic" {
   name         = "fiap-tech-challenge-customer-topic"
-  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id  
+  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id
 }
 
 
@@ -157,13 +157,32 @@ data "azurerm_log_analytics_workspace" "log_workspace" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "function_monitor" {
-  name                       = "fiap-tech-challenge-customer-monitor"
+  name                       = "fiap-tech-challenge-customer-function-monitor"
   target_resource_id         = azurerm_linux_function_app.linux_function.id
   storage_account_id         = data.azurerm_storage_account.log_storage_account.id
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_workspace.id
 
   enabled_log {
     category = "FunctionAppLogs"
+  }
+
+  metric {
+    category = "AllMetrics"
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "topic_monitor" {
+  name                       = "fiap-tech-challenge-customer-topic-monitor"
+  target_resource_id         = azurerm_servicebus_namespace.servicebus_namespace.id
+  storage_account_id         = data.azurerm_storage_account.log_storage_account.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_workspace.id
+
+  enabled_log {
+    category = "OperationalLogs"
+  }
+
+  enabled_log {
+    category = "ServiceBusResourceLogs"
   }
 
   metric {
