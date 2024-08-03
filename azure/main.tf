@@ -94,7 +94,7 @@ resource "azurerm_servicebus_topic" "servicebus_topic" {
 
 resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_manager" {
   name     = "${azurerm_servicebus_topic.servicebus_topic.name}-manager"
-  topic_id = azurerm_servicebus_topic.example.id
+  topic_id = azurerm_servicebus_topic.servicebus_topic.id
   listen   = true
   send     = true
   manage   = true
@@ -102,7 +102,7 @@ resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_manager
 
 resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_publisher" {
   name     = "${azurerm_servicebus_topic.servicebus_topic.name}-publisher"
-  topic_id = azurerm_servicebus_topic.example.id
+  topic_id = azurerm_servicebus_topic.servicebus_topic.id
   listen   = false
   send     = true
   manage   = false
@@ -110,7 +110,7 @@ resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_publish
 
 resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_listener" {
   name     = "${azurerm_servicebus_topic.servicebus_topic.name}-listener"
-  topic_id = azurerm_servicebus_topic.example.id
+  topic_id = azurerm_servicebus_topic.servicebus_topic.id
   listen   = true
   send     = false
   manage   = false
