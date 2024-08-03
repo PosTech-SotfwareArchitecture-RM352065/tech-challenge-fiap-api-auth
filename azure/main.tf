@@ -89,9 +89,7 @@ resource "azurerm_servicebus_namespace" "servicebus_namespace" {
 
 resource "azurerm_servicebus_topic" "servicebus_topic" {
   name         = "fiap-tech-challenge-customer-topic"
-  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id
-
-  enable_partitioning = false
+  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id  
 }
 
 
