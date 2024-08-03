@@ -217,7 +217,7 @@ output "sanduba_customer_database_connection_string" {
 
 output "sanduba_customer_topic_manager_connection_string" {
   sensitive = true
-  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.connection_string
+  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.primary_connection_string
 }
 
 output "sanduba_customer_topic_publisher_connection_string" {
