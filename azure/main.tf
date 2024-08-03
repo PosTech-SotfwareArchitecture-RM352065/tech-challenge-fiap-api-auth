@@ -178,7 +178,7 @@ resource "azurerm_monitor_diagnostic_setting" "topic_monitor" {
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_workspace.id
 
   enabled_log {
-    category = "allLogs"
+    category_group = "allLogs"
   }
 
   metric {
