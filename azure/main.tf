@@ -92,6 +92,29 @@ resource "azurerm_servicebus_topic" "servicebus_topic" {
   namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id
 }
 
+resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_manager" {
+  name     = "${azurerm_servicebus_topic.servicebus_topic.name}-manager"
+  topic_id = azurerm_servicebus_topic.example.id
+  listen   = true
+  send     = true
+  manage   = true
+}
+
+resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_publisher" {
+  name     = "${azurerm_servicebus_topic.servicebus_topic.name}-publisher"
+  topic_id = azurerm_servicebus_topic.example.id
+  listen   = false
+  send     = true
+  manage   = false
+}
+
+resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_listener" {
+  name     = "${azurerm_servicebus_topic.servicebus_topic.name}-listener"
+  topic_id = azurerm_servicebus_topic.example.id
+  listen   = true
+  send     = false
+  manage   = false
+}
 
 data "azurerm_storage_account" "storage_account_terraform" {
   name                = "sandubaterraform"
@@ -123,6 +146,7 @@ resource "azurerm_linux_function_app" "linux_function" {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE   = false
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     "SqlServerSettings__ConnectionString" = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    "TopicSettings__ConnectionString"     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.connection_string
     AUTH_SECRET_KEY                       = random_uuid.auth_secret_key.result
     AUTH_ISSUER                           = "Sanduba.Auth"
     AUTH_AUDIENCE                         = "Users"
@@ -189,6 +213,21 @@ resource "azurerm_monitor_diagnostic_setting" "topic_monitor" {
 output "sanduba_customer_database_connection_string" {
   sensitive = true
   value     = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+}
+
+output "sanduba_customer_topic_manager_connection_string" {
+  sensitive = true
+  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.connection_string
+}
+
+output "sanduba_customer_topic_publisher_connection_string" {
+  sensitive = true
+  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_publisher.primary_connection_string
+}
+
+output "sanduba_customer_topic_listener_connection_string" {
+  sensitive = true
+  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_listener.primary_connection_string
 }
 
 output "sanduba_customer_auth_key" {
