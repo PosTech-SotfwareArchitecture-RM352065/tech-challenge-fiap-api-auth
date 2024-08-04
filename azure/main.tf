@@ -240,3 +240,13 @@ output "sanduba_customer_url" {
   sensitive = false
   value     = "https://${azurerm_linux_function_app.linux_function.default_hostname}/api"
 }
+
+data "azurerm_function_app_host_keys" "function_app_key" {
+  name                = azurerm_linux_function_app.linux_function.name
+  resource_group_name = azurerm_linux_function_app.linux_function.resource_group_name
+}
+
+output "sanduba_customer_admin_api_key" {
+  sensitive = true
+  value     = data.azurerm_function_app_host_keys.function_app_key.primary_key
+}

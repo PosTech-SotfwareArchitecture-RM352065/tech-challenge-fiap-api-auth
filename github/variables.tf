@@ -39,3 +39,10 @@ variable "sanduba_customer_url" {
   sensitive = false
   default   = ""
 }
+
+
+variable "sanduba_customer_admin_api_key" {
+  type      = string
+  sensitive = true
+  default   = ""
+}

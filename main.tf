@@ -46,5 +46,6 @@ module "github" {
   sanduba_customer_topic_publisher_connection_string = module.azure.sanduba_customer_topic_publisher_connection_string
   sanduba_customer_topic_listener_connection_string  = module.azure.sanduba_customer_topic_listener_connection_string
   sanduba_customer_url                               = module.azure.sanduba_customer_url
+  sanduba_customer_admin_api_key                     = module.azure.sanduba_customer_admin_api_key
   environment                                        = data.azurerm_resource_group.main_group.tags["environment"]
 }
