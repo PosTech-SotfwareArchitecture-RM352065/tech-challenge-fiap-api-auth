@@ -4,7 +4,6 @@ resource "github_actions_organization_secret" "github_auth_secret_key" {
   plaintext_value = var.sanduba_customer_auth_secret_key
 }
 
-
 resource "github_actions_organization_secret" "database_connectionstring" {
   secret_name     = "APP_CUSTOMER_DATABASE_CONNECTION_STRING"
   visibility      = "all"
@@ -33,4 +32,10 @@ resource "github_actions_organization_variable" "sanduba_customer_url" {
   variable_name = "APP_CUSTOMER_URL"
   visibility    = "all"
   value         = var.sanduba_customer_url
+}
+
+resource "github_actions_organization_variable" "sanduba_customer_admin_api_key" {
+  variable_name = "APP_CUSTOMER_ADMIN_API_KEY"
+  visibility    = "all"
+  value         = var.sanduba_customer_admin_api_key
 }
