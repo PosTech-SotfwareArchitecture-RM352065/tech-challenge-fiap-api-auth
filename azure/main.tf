@@ -146,7 +146,8 @@ resource "azurerm_linux_function_app" "linux_function" {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE   = false
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     "SqlServerSettings__ConnectionString" = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-    "TopicSettings__ConnectionString"     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.primary_connection_string
+    "BrokerSettings__ConnectionString"    = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.primary_connection_string
+    "BrokerSettings__TopicName"           = azurerm_servicebus_topic.servicebus_topic.name
     AUTH_SECRET_KEY                       = random_uuid.auth_secret_key.result
     AUTH_ISSUER                           = "Sanduba.Auth"
     AUTH_AUDIENCE                         = "Users"
