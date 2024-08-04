@@ -76,6 +76,46 @@ resource "azurerm_service_plan" "customer_plan" {
   }
 }
 
+resource "azurerm_servicebus_namespace" "servicebus_namespace" {
+  name                = "fiap-tech-challenge-customer-topic-namespace"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  sku                 = "Standard"
+
+  tags = {
+    environment = azurerm_resource_group.resource_group.tags["environment"]
+  }
+}
+
+resource "azurerm_servicebus_topic" "servicebus_topic" {
+  name         = "fiap-tech-challenge-customer-topic"
+  namespace_id = azurerm_servicebus_namespace.servicebus_namespace.id
+}
+
+resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_manager" {
+  name     = "${azurerm_servicebus_topic.servicebus_topic.name}-manager"
+  topic_id = azurerm_servicebus_topic.servicebus_topic.id
+  listen   = true
+  send     = true
+  manage   = true
+}
+
+resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_publisher" {
+  name     = "${azurerm_servicebus_topic.servicebus_topic.name}-publisher"
+  topic_id = azurerm_servicebus_topic.servicebus_topic.id
+  listen   = false
+  send     = true
+  manage   = false
+}
+
+resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_listener" {
+  name     = "${azurerm_servicebus_topic.servicebus_topic.name}-listener"
+  topic_id = azurerm_servicebus_topic.servicebus_topic.id
+  listen   = true
+  send     = false
+  manage   = false
+}
+
 data "azurerm_storage_account" "storage_account_terraform" {
   name                = "sandubaterraform"
   resource_group_name = var.main_resource_group
@@ -106,6 +146,8 @@ resource "azurerm_linux_function_app" "linux_function" {
     WEBSITES_ENABLE_APP_SERVICE_STORAGE   = false
     FUNCTIONS_EXTENSION_VERSION           = "~4"
     "SqlServerSettings__ConnectionString" = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+    "BrokerSettings__ConnectionString"    = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.primary_connection_string
+    "BrokerSettings__TopicName"           = azurerm_servicebus_topic.servicebus_topic.name
     AUTH_SECRET_KEY                       = random_uuid.auth_secret_key.result
     AUTH_ISSUER                           = "Sanduba.Auth"
     AUTH_AUDIENCE                         = "Users"
@@ -140,7 +182,7 @@ data "azurerm_log_analytics_workspace" "log_workspace" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "function_monitor" {
-  name                       = "fiap-tech-challenge-customer-monitor"
+  name                       = "fiap-tech-challenge-customer-function-monitor"
   target_resource_id         = azurerm_linux_function_app.linux_function.id
   storage_account_id         = data.azurerm_storage_account.log_storage_account.id
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_workspace.id
@@ -154,9 +196,39 @@ resource "azurerm_monitor_diagnostic_setting" "function_monitor" {
   }
 }
 
+resource "azurerm_monitor_diagnostic_setting" "topic_monitor" {
+  name                       = "fiap-tech-challenge-customer-topic-monitor"
+  target_resource_id         = azurerm_servicebus_namespace.servicebus_namespace.id
+  storage_account_id         = data.azurerm_storage_account.log_storage_account.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_workspace.id
+
+  enabled_log {
+    category_group = "allLogs"
+  }
+
+  metric {
+    category = "AllMetrics"
+  }
+}
+
 output "sanduba_customer_database_connection_string" {
   sensitive = true
   value     = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+}
+
+output "sanduba_customer_topic_manager_connection_string" {
+  sensitive = true
+  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.primary_connection_string
+}
+
+output "sanduba_customer_topic_publisher_connection_string" {
+  sensitive = true
+  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_publisher.primary_connection_string
+}
+
+output "sanduba_customer_topic_listener_connection_string" {
+  sensitive = true
+  value     = azurerm_servicebus_topic_authorization_rule.servicebus_topic_listener.primary_connection_string
 }
 
 output "sanduba_customer_auth_key" {

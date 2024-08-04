@@ -39,9 +39,12 @@ module "azure" {
 }
 
 module "github" {
-  source                                      = "./github"
-  sanduba_customer_auth_secret_key            = module.azure.sanduba_customer_auth_key
-  sanduba_customer_database_connection_string = module.azure.sanduba_customer_database_connection_string
-  sanduba_customer_url                        = module.azure.sanduba_customer_url
-  environment                                 = data.azurerm_resource_group.main_group.tags["environment"]
+  source                                             = "./github"
+  sanduba_customer_auth_secret_key                   = module.azure.sanduba_customer_auth_key
+  sanduba_customer_database_connection_string        = module.azure.sanduba_customer_database_connection_string
+  sanduba_customer_topic_manager_connection_string   = module.azure.sanduba_customer_topic_manager_connection_string
+  sanduba_customer_topic_publisher_connection_string = module.azure.sanduba_customer_topic_publisher_connection_string
+  sanduba_customer_topic_listener_connection_string  = module.azure.sanduba_customer_topic_listener_connection_string
+  sanduba_customer_url                               = module.azure.sanduba_customer_url
+  environment                                        = data.azurerm_resource_group.main_group.tags["environment"]
 }
