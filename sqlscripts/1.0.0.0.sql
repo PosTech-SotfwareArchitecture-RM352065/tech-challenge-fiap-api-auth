@@ -5,10 +5,10 @@ IF(OBJECT_ID('dbo.Sp_ValidateLogin') IS NOT NULL) DROP PROCEDURE dbo.Sp_Validate
 
 CREATE TABLE Customers (
     Id          UNIQUEIDENTIFIER    NOT NULL
-,   CPF         VARCHAR(11)         NOT NULL
-,   [Name]      VARCHAR(50)         NOT NULL
-,   Email       VARCHAR(50)         NOT NULL
-,   [Password]  BINARY(64)          NOT NULL
+,   CPF         VARCHAR(11)         NULL
+,   [Name]      VARCHAR(50)         NULL
+,   Email       VARCHAR(50)         NULL
+,   [Password]  BINARY(64)          NULL
 ,   [Active]    BIT                 NOT NULL DEFAULT(1)
 ,   CONSTRAINT Pk_Customer PRIMARY KEY NONCLUSTERED (Id)
 ,   CONSTRAINT Uk1_Customer UNIQUE CLUSTERED (CPF)
