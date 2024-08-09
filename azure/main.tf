@@ -118,7 +118,7 @@ resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_listene
 
 resource "azurerm_servicebus_subscription" "topic_subscription" {
   name               = "customer-topic-subscription"
-  topic_id           = data.azurerm_servicebus_topic.servicebus_topic.id
+  topic_id           = azurerm_servicebus_topic.servicebus_topic.id
   max_delivery_count = 1
 }
 
