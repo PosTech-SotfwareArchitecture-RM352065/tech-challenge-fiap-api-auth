@@ -116,6 +116,12 @@ resource "azurerm_servicebus_topic_authorization_rule" "servicebus_topic_listene
   manage   = false
 }
 
+resource "azurerm_servicebus_subscription" "topic_subscription" {
+  name               = "customer-topic-subscription"
+  topic_id           = data.azurerm_servicebus_topic.servicebus_topic.id
+  max_delivery_count = 1
+}
+
 data "azurerm_storage_account" "storage_account_terraform" {
   name                = "sandubaterraform"
   resource_group_name = var.main_resource_group
@@ -148,6 +154,7 @@ resource "azurerm_linux_function_app" "linux_function" {
     "SqlServerSettings__ConnectionString" = "Server=tcp:${azurerm_mssql_server.sqlserver.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.sanduba_customer_database.name};Persist Security Info=False;User ID=${random_uuid.sqlserver_user.result};Password=${random_password.sqlserver_password.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
     "BrokerSettings__ConnectionString"    = azurerm_servicebus_topic_authorization_rule.servicebus_topic_manager.primary_connection_string
     "BrokerSettings__TopicName"           = azurerm_servicebus_topic.servicebus_topic.name
+    "BrokerSettings__SubscriptionName"    = azurerm_servicebus_subscription.topic_subscription.name
     AUTH_SECRET_KEY                       = random_uuid.auth_secret_key.result
     AUTH_ISSUER                           = "Sanduba.Auth"
     AUTH_AUDIENCE                         = "Users"
